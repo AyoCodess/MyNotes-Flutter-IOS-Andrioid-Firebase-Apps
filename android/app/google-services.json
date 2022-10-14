@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "887821388369",
+    "project_id": "mynotes-ayocodes",
+    "storage_bucket": "mynotes-ayocodes.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:887821388369:android:254b0a6786fa37babf0670",
+        "android_client_info": {
+          "package_name": "com.ayoadesanya.mynotes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "887821388369-ak7ns338subbpaldag5agn12idouaon5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChJz_FPNwB0TU8-dDFlwjDhvesr7vu01w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "887821388369-ak7ns338subbpaldag5agn12idouaon5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
