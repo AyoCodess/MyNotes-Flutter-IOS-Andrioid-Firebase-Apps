@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:developer' as devtools show log;
 
+import 'package:mynotes/constants/routes.dart';
+
+import '../utilities/show_error_alert.dart';
+
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
@@ -62,53 +66,41 @@ class _LoginViewState extends State<LoginView> {
                       .signInWithEmailAndPassword(
                           email: email, password: password);
                   devtools.log(userCredential.toString());
-                  if (!mounted) return;
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, '/mynotes/', (route) => false);
+
+                  final user = FirebaseAuth.instance.currentUser;
+
+                  if (user?.emailVerified ?? false) {
+                    if (!mounted) return;
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, mynotesRoute, (route) => false);
+                  } else {
+                    if (!mounted) return;
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, verifyEmailRoute, (route) => false);
+                  }
                 } on FirebaseAuthException catch (e) {
-                  print(e.code);
-                  switch (e.code) {
-                    case 'user-not-found':
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content:
-                              Text('No user found for that email or password.'),
-                        ),
-                      );
-                      break;
-                    case 'wrong-password':
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Wrong password.'),
-                        ),
-                      );
-                      break;
-                    case 'too-many-requests':
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('too many requests, try again later.'),
-                        ),
-                      );
-                      break;
-                    default:
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Something went wrong, try again.'),
-                        ),
-                      );
+                  if (e.code == 'user-not-found') {
+                    devtools.log(e.code.toString());
+                    return await showErrorDialog(context, 'User not found');
+                  }
+                  if (e.code == 'wrong-password' || e.code == 'invalid-email') {
+                    return await showErrorDialog(
+                        context, 'Wrong password or email.');
+                  } else {
+                    return await showErrorDialog(
+                        context, 'Error: ${e.code}. Please try again.');
                   }
                 } catch (e) {
-                  devtools.log(e.toString());
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text(
-                          'An unknown error occurred. Please try again later.')));
+                  devtools.log(e.runtimeType.toString());
+                  return await showErrorDialog(
+                      context, 'Error: ${e.toString()}. Please try again.');
                 }
               },
               child: const Text('Login')),
           TextButton(
               onPressed: () {
                 Navigator.pushNamedAndRemoveUntil(
-                    context, '/register/', (route) => false);
+                    context, registerRoute, (route) => false);
               },
               child: const Text('Not Registered yet? Register here!'))
         ],

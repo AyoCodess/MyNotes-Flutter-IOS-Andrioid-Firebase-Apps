@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mynotes/constants/routes.dart';
+import 'package:mynotes/utilities/show_error_alert.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -58,37 +60,39 @@ class _RegisterViewState extends State<RegisterView> {
                 try {
                   await FirebaseAuth.instance.createUserWithEmailAndPassword(
                       email: email, password: password);
+                  if (!mounted) return;
+
+                  final user = FirebaseAuth.instance.currentUser;
+                  await user?.sendEmailVerification();
+                  Navigator.pushNamed(context, verifyEmailRoute);
                 } on FirebaseAuthException catch (e) {
-                  switch (e.code) {
-                    case 'weak-password':
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('The password provided is too weak.')));
-                      break;
-                    case 'email-already-in-use':
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text(
-                              'The account already exists for that email.')));
-                      break;
-                    case 'invalid-email':
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content:
-                              Text('The email address is badly formatted.')));
-                      break;
-                    default:
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Something went wrong, try again.')));
+                  if (e.code == 'weak-password') {
+                    return await showErrorDialog(
+                        context, 'Password must be at least 6 characters');
+                  }
+                  if (e.code == 'email-already-in-use') {
+                    return await showErrorDialog(
+                        context, 'The account already exists for that email.');
+                  }
+                  if (e.code == 'invalid-email') {
+                    if (!mounted) return;
+                    return await showErrorDialog(
+                        context, 'The email is an invalid email address.');
+                  } else {
+                    if (!mounted) return;
+                    return await showErrorDialog(
+                        context, 'Error: ${e.code}, Please try again');
                   }
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text(
-                          'An unknown error occurred. Please try again later.')));
+                  return await showErrorDialog(
+                      context, 'Error: ${e.toString()}. Please try again.');
                 }
               },
               child: const Text('Register')),
           TextButton(
               onPressed: () {
                 Navigator.pushNamedAndRemoveUntil(
-                    context, '/login/', (route) => false);
+                    context, loginRoute, (route) => false);
               },
               child: const Text('Already registered? Login here!'))
         ],
