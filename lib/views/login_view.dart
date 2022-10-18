@@ -1,9 +1,8 @@
 // ignore_for_file: avoid_print
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mynotes/firebase_options.dart';
+import 'dart:developer' as devtools show log;
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -59,11 +58,13 @@ class _LoginViewState extends State<LoginView> {
                 final email = _email.text;
                 final password = _password.text;
                 try {
-                  final c = await FirebaseAuth.instance
+                  final userCredential = await FirebaseAuth.instance
                       .signInWithEmailAndPassword(
                           email: email, password: password);
-
-                  print(c);
+                  devtools.log(userCredential.toString());
+                  if (!mounted) return;
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/mynotes/', (route) => false);
                 } on FirebaseAuthException catch (e) {
                   print(e.code);
                   switch (e.code) {
@@ -97,6 +98,7 @@ class _LoginViewState extends State<LoginView> {
                       );
                   }
                 } catch (e) {
+                  devtools.log(e.toString());
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text(
                           'An unknown error occurred. Please try again later.')));
