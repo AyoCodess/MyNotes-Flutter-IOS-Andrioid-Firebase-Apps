@@ -1,67 +1,18 @@
 //. LOGIN EXCEPTIONS
-class UserNotFoundAuthException implements Exception {
-  final String? message;
+class UserNotFoundAuthException implements Exception {}
 
-  UserNotFoundAuthException({this.message});
+class UserWrongPasswordAuthException implements Exception {}
 
-  @override
-  String toString() => 'UserNotFoundAuthException: $message';
-}
-
-class UserWrongPasswordAuthException implements Exception {
-  final String? message;
-
-  UserWrongPasswordAuthException({this.message});
-
-  @override
-  String toString() => 'UserWrongPasswordAuthException: $message';
-}
-
-class UserInvalidEmailAuthException implements Exception {
-  final String? message;
-
-  UserInvalidEmailAuthException({this.message});
-
-  @override
-  String toString() => 'UserInvalidEmailAuthException: $message';
-}
+class UserInvalidEmailAuthException implements Exception {}
 
 //. REGISTER EXCEPTIONS
 
-class UserWeakPasswordAuthException implements Exception {
-  final String? message;
+class UserWeakPasswordAuthException implements Exception {}
 
-  UserWeakPasswordAuthException({this.message});
-
-  @override
-  String toString() => 'UserWeakPasswordAuthException: $message';
-}
-
-class UserEmailAlreadyInUseAuthException implements Exception {
-  final String? message;
-
-  UserEmailAlreadyInUseAuthException({this.message});
-
-  @override
-  String toString() => 'UserEmailAlreadyInUseAuthException: $message';
-}
+class UserEmailAlreadyInUseAuthException implements Exception {}
 
 // . GENERAL EXCEPTIONS
 
-class GenericAuthException implements Exception {
-  final String? message;
+class GenericAuthException implements Exception {}
 
-  GenericAuthException({this.message});
-
-  @override
-  String toString() => message ?? 'Unknown error, please try again';
-}
-
-class UserNotLoggedInAuthException implements Exception {
-  final String? message;
-
-  UserNotLoggedInAuthException({this.message});
-
-  @override
-  String toString() => 'UserNotLoggedInAuthException: ${message ?? ''}';
-}
+class UserNotLoggedInAuthException implements Exception {}

@@ -1,10 +1,10 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:developer' as devtools show log;
-
 import 'package:mynotes/constants/routes.dart';
+import 'package:mynotes/services/auth/auth_exceptions.dart';
+import 'package:mynotes/services/auth/auth_service.dart';
 
 import '../utilities/show_error_alert.dart';
 
@@ -62,14 +62,14 @@ class _LoginViewState extends State<LoginView> {
                 final email = _email.text;
                 final password = _password.text;
                 try {
-                  final userCredential = await FirebaseAuth.instance
-                      .signInWithEmailAndPassword(
-                          email: email, password: password);
-                  devtools.log(userCredential.toString());
+                  await AuthService.firebase().login(
+                    email: email,
+                    password: password,
+                  );
 
-                  final user = FirebaseAuth.instance.currentUser;
+                  final user = AuthService.firebase().currentUser;
 
-                  if (user?.emailVerified ?? false) {
+                  if (user?.isEmailVerified ?? false) {
                     if (!mounted) return;
                     Navigator.pushNamedAndRemoveUntil(
                         context, mynotesRoute, (route) => false);
@@ -78,22 +78,26 @@ class _LoginViewState extends State<LoginView> {
                     Navigator.pushNamedAndRemoveUntil(
                         context, verifyEmailRoute, (route) => false);
                   }
-                } on FirebaseAuthException catch (e) {
-                  if (e.code == 'user-not-found') {
-                    devtools.log(e.code.toString());
-                    return await showErrorDialog(context, 'User not found');
-                  }
-                  if (e.code == 'wrong-password' || e.code == 'invalid-email') {
-                    return await showErrorDialog(
-                        context, 'Wrong password or email.');
-                  } else {
-                    return await showErrorDialog(
-                        context, 'Error: ${e.code}. Please try again.');
-                  }
-                } catch (e) {
-                  devtools.log(e.runtimeType.toString());
+                } on UserNotFoundAuthException {
                   return await showErrorDialog(
-                      context, 'Error: ${e.toString()}. Please try again.');
+                    context,
+                    'User not found',
+                  );
+                } on UserWrongPasswordAuthException {
+                  return await showErrorDialog(
+                    context,
+                    'Wrong password or email.',
+                  );
+                } on UserInvalidEmailAuthException {
+                  return await showErrorDialog(
+                    context,
+                    'Wrong password or email.',
+                  );
+                } on GenericAuthException {
+                  return await showErrorDialog(
+                    context,
+                    'Authentication error, please try again.',
+                  );
                 }
               },
               child: const Text('Login')),

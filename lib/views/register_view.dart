@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mynotes/constants/routes.dart';
+import 'package:mynotes/services/auth/auth_exceptions.dart';
+import 'package:mynotes/services/auth/auth_service.dart';
 import 'package:mynotes/utilities/show_error_alert.dart';
 
 class RegisterView extends StatefulWidget {
@@ -58,34 +59,34 @@ class _RegisterViewState extends State<RegisterView> {
                 final password = _password.text;
 
                 try {
-                  await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                      email: email, password: password);
-                  if (!mounted) return;
+                  await AuthService.firebase()
+                      .createUser(email: email, password: password);
 
-                  final user = FirebaseAuth.instance.currentUser;
-                  await user?.sendEmailVerification();
+                  await AuthService.firebase().sendEmailVerification();
+                  if (!mounted) return;
                   Navigator.pushNamed(context, verifyEmailRoute);
-                } on FirebaseAuthException catch (e) {
-                  if (e.code == 'weak-password') {
-                    return await showErrorDialog(
-                        context, 'Password must be at least 6 characters');
-                  }
-                  if (e.code == 'email-already-in-use') {
-                    return await showErrorDialog(
-                        context, 'The account already exists for that email.');
-                  }
-                  if (e.code == 'invalid-email') {
-                    if (!mounted) return;
-                    return await showErrorDialog(
-                        context, 'The email is an invalid email address.');
-                  } else {
-                    if (!mounted) return;
-                    return await showErrorDialog(
-                        context, 'Error: ${e.code}, Please try again');
-                  }
-                } catch (e) {
+                } on UserWeakPasswordAuthException {
                   return await showErrorDialog(
-                      context, 'Error: ${e.toString()}. Please try again.');
+                    context,
+                    'Password must be at least 6 characters',
+                  );
+                } on UserEmailAlreadyInUseAuthException {
+                  return await showErrorDialog(
+                    context,
+                    'The account already exists for that email.',
+                  );
+                } on UserInvalidEmailAuthException {
+                  if (!mounted) return;
+                  return await showErrorDialog(
+                    context,
+                    'The email is an invalid email address.',
+                  );
+                } on GenericAuthException {
+                  if (!mounted) return;
+                  return await showErrorDialog(
+                    context,
+                    'An error occurred while attempting to register.',
+                  );
                 }
               },
               child: const Text('Register')),
